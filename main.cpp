@@ -3,7 +3,7 @@
 #include <mpi.h>
 #include <omp.h>
 
-static const double predefined_res = 0;
+static const double predefined_res = 1./24;
 static double eps;
 static long points_batch_num = 10000;
 
@@ -17,12 +17,14 @@ struct Point
 
 double f( double x, double y, double z)
 {
-    return x+y+z;
+    return x*x*x*y*y*z;
 }
 
 bool isInArea( double x, double y, double z)
 {
-    return x + y < z && x > 0 && y > 0 && z < 1;
+    return -1 <= x && x <= 0
+        && -1 <= y && y <= 0
+        && -1 <= z && z <= 0;
 }
 
 double F( double x, double y, double z) { return isInArea( x, y, z) ? f( x, y, z) : 0; }
@@ -62,7 +64,7 @@ int main( int argc, char **argv)
         // return_finalize(-1);
     } else
     {
-        double eps = std::atof(argv[1]);
+        eps = std::atof(argv[1]);
     }
 
     long local_points_num = 0;
@@ -127,12 +129,11 @@ bool do_continue;
     }
 
 #elif defined(DISTRIBUTED)
-    RandomGenerator r( 0, 1, 71*((rank+1)*clock() + 333));
+    RandomGenerator r( -1, 0, 71*((rank+1)*clock() + 333));
     do
     {
         batchs_num++;
         do_continue = false;
-        #pragma omp parallel for
         for ( long j = 0; j < points_batch_num; ++j )
         {
             double x = r.rand();
@@ -146,7 +147,7 @@ bool do_continue;
         if ( rank == 0 )
         {
             res = (double)total_sum / (batchs_num * size * points_batch_num);
-            std::cout << res << std::endl;
+            // std::cout << std::abs(predefined_res - res) << " " << eps << " " << res << std::endl;
             do_continue = std::abs(predefined_res - res) > eps;
         }
         MPI_Bcast( &do_continue, 1, MPI_CXX_BOOL, 0, MPI_COMM_WORLD);
