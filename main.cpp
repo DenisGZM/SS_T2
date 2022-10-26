@@ -92,7 +92,6 @@ bool do_continue;
         {
             batchs_num++;
             do_continue = false;
-            #pragma omp parallel for
             for ( int i = 1; i < size; ++i )
             {
                 for ( long j = 0; j < points_batch_num; ++j )
