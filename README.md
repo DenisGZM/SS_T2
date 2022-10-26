@@ -1,8 +1,8 @@
-# Generalized Monte-Carlo's integration method for SS (what is 2nd "S" stands for?!) practicum.
+# Generalized Monte-Carlo's integration method for SS practicum.
 
 ```
-$ mpic++ main.cpp -O2 -fopenmp [-DMASTER/-DDISTRIBUTED] -o monte-carlo
-$ ./monte-carlo <EPS>
+$ make monte-carlo-d
+$ make run-d
 ```
 
 Enjoy!
