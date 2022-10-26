@@ -71,6 +71,8 @@ int main( int argc, char **argv)
     long total_points = 0;
     double local_time = 0;
     double res = 0;
+    points_batch_num = (points_batch_num - 1) / size + 1;
+
     local_time = -MPI_Wtime();
 
 #if not defined(MASTER) and not defined(DISTRIBUTED)
@@ -83,7 +85,7 @@ bool do_continue;
 #if defined(MASTER)
     if ( rank == 0 )
     {
-        RandomGenerator r( 0, 1,  71*((size+1)*clock() + 333));
+        RandomGenerator r( 0, 1,  137 + rank);
         Point points[(size-1)*points_batch_num];
         // Point *points = new Point[(size-1)*points_batch_num];
         do
@@ -129,7 +131,7 @@ bool do_continue;
     }
 
 #elif defined(DISTRIBUTED)
-    RandomGenerator r( -1, 0, 71*((rank+1)*clock() + 333));
+    RandomGenerator r( -1, 0, 137 + rank);
     do
     {
         batchs_num++;
@@ -156,7 +158,7 @@ bool do_continue;
 #else
     return_finalize(-1);
 #endif
-
+    local_time += MPI_Wtime();
     double max_time;
     MPI_Reduce( &local_time, &max_time, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
     if( rank == 0 )
